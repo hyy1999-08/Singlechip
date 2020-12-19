@@ -1,0 +1,302 @@
+Generalplus u'nSP Assembler - Ver. 1.14.14.2
+              Listing File Has Been Relocated
+                            	//专为任意点显示而存在的代码
+                            	/////-----       图形显示模式	    -----/////
+                            	.define PAINT_COVER		0
+                            	.define PAINT_SET		1
+                            	.define PAINT_CLR		2
+                            	.define PAINT_REV		3
+                            	.define PAINT_RECO		4
+                            	
+00000001                    	.ram
+                            	.external _CurPaintMode			//Painting mode
+                            	.external _Shift_Data_buf//:	.DW 	5	 Dup(0)
+                            	.external _Cover_Data_buf
+00000001 00 00              	.var Data_Add
+00000002 00 00              	.var Num_buf
+00000003 00 00              	.var Cover_Mask
+00000004 00 00              	.var Bit_Num
+                            	
+                            	.external _Shift_Buff
+00009B8A                    	.code
+                            	.public _F_Data_Cover
+                            	_F_Data_Cover:
+00009B8A 88 DA              		push r5 to [sp]
+00009B8B 08 0B 01 00        		r5 = sp+1
+00009B8D 98 D8              		push r2,r4 to [sp]
+00009B8E 03 92              		r1 = [r5+3]						//Get the Buffer Address
+00009B8F 04 94              		r2 = [r5+4]						//Get Shift Num
+00009B90 05 96              		r3 = [r5+5]						//Get All the Data`s number want shift
+00009B91 06 98              		r4 = [r5+6]						//Get bit Numbers
+00009B92 40 F0 E0 9B        		call F_Data_Move
+00009B94 1B D7 02 00        		[Num_buf] = r3
+00009B96 09 93 0F 00        		r1 = _Shift_Data_buf
+00009B98 43 02              		r1 = r1+3
+00009B99 19 D3 01 00        		[Data_Add] = r1// to [sp]
+00009B9B 1C D9 04 00        		[Bit_Num] = r4
+00009B9D 0A C5 FF FF        		test r2,0xffff
+00009B9F 01 4E              		jnz F_Data_Cover_L1
+00009BA0 0E EE              		jmp F_Data_Cover_NotS
+                            	F_Data_Cover_L1:					//Shift the Number of the source begin....
+00009BA1 11 93 01 00        		r1 = [Data_Add]
+00009BA3 13 97 02 00        		r3 = [Num_buf]
+00009BA5 40 98              		r4 = 0
+00009BA6 5C 99              		r4 = r4 lsl 4
+                            	F_Data_Cover_L2:
+00009BA7 C1 98              		r4 = [r1]
+00009BA8 84 99              		r4 = r4 rol 1
+00009BA9 C9 D8              		[r1--] = r4
+00009BAA 54 99              		r4 = r4 lsl 3
+00009BAB 41 26              		r3-=1
+00009BAC 46 4E              		jnz	F_Data_Cover_L2
+00009BAD 41 24              		r2-=1
+00009BAE 4E 4E              		jnz	F_Data_Cover_L1				//...end
+                            	F_Data_Cover_NotS:
+00009BAF 13 97 02 00        		r3 = [Num_buf]					//Get the data number for all(word)
+00009BB1 0C 99 0B 00        		r4 = _Shift_Buff			//index to Data of LCD Read Back
+00009BB3 43 08              		r4 += 3
+00009BB4 0A 95 0F 00        		r2 = _Shift_Data_buf		//index to Data of Source
+00009BB6 43 04              		r2 += 3
+00009BB7 11 93 05 00        		r1 = [_CurPaintMode]
+00009BB9 02 5E              		jz ?F_Data_Cover_Cover
+00009BBA 44 42              		cmp r1,PAINT_RECO//VER
+00009BBB 0A 4E              		jnz	?F_Data_Cover_Not
+                            	?F_Data_Cover_Cover:
+00009BBC 0D 9B 13 00        		r5 = _Cover_Data_buf
+00009BBE 43 0A              		r5 += 3
+                            	?F_Data_Cover_L21:
+00009BBF CC 92              		r1 = [r4--]
+00009BC0 CD B2              		r1 = r1 & [r5--]
+00009BC1 C2 A2              		r1 = r1 | [r2]
+00009BC2 CA D2              		[r2--] = r1
+00009BC3 41 26              		r3 -= 1
+00009BC4 46 4E              		jnz ?F_Data_Cover_L21
+00009BC5 17 EE              		jmp F_Data_Cover_Exit
+                            	?F_Data_Cover_Not:
+00009BC6 41 42              		cmp r1,PAINT_SET
+00009BC7 06 4E              		jnz ?F_Data_Cover_Not1
+                            	?F_Data_SET_L1:
+00009BC8 CC 92              		r1 = [r4--]
+00009BC9 C2 A2              		r1 = r1|[r2]
+00009BCA CA D2              		[r2--] = r1
+00009BCB 41 26              		r3-=1
+00009BCC 45 4E              		jnz ?F_Data_SET_L1
+00009BCD 0F EE              		jmp F_Data_Cover_Exit
+                            	?F_Data_Cover_Not1:
+00009BCE 42 42              		cmp r1,PAINT_CLR
+00009BCF 08 4E              		jnz ?F_Data_Cover_Not2
+                            	?F_Data_CLR_L1:
+00009BD0 C2 92              		r1 = [r2]
+00009BD1 09 83 FF FF        		r1 = r1^0xffff
+00009BD3 CC B2              		r1 = r1&[r4--]
+00009BD4 CA D2              		[r2--] = r1
+00009BD5 41 26              		r3-=1
+00009BD6 47 4E              		jnz ?F_Data_CLR_L1
+00009BD7 05 EE              		jmp	F_Data_Cover_Exit
+                            	?F_Data_Cover_Not2:
+                            	?F_Data_REV_L1:
+00009BD8 CC 92              		r1 = [r4--]
+00009BD9 C2 82              		r1 = r1^[r2]
+00009BDA CA D2              		[r2--] = r1
+00009BDB 41 26              		r3-=1
+00009BDC 45 4E              		jnz ?F_Data_REV_L1
+                            	F_Data_Cover_Exit:
+00009BDD 98 92              		pop r2,r4 from [sp]
+00009BDE 88 98              		pop r5 from [sp]
+00009BDF 90 9A              		retf
+                            		
+                            	F_Data_Move:
+00009BE0 A0 DA              		push r2,r5 to [sp]
+00009BE1 0C B7 0F 00        		r3 = r4&0x0f
+00009BE3 7C 99              		r4 = r4 lsr 4
+00009BE4 04 03              		r1 = r1+r4
+00009BE5 0B C7 FF 00        		test r3,0xff
+00009BE7 02 4E              		jnz F_Data_Move_NotAd
+00009BE8 41 22              		r1-=1
+00009BE9 01 EE              		jmp	F_Data_Move_22
+                            	F_Data_Move_NotAd:
+00009BEA 41 08              		r4 = r4+1
+                            	F_Data_Move_22:
+00009BEB 0A 95 0F 00        		r2 = _Shift_Data_buf
+00009BED 43 04              		r2 = r2+3
+00009BEE 15 9B 05 00        		r5 = [_CurPaintMode]
+00009BF0 44 4A              		cmp r5,PAINT_RECO
+00009BF1 07 4E              		jnz F_Data_Move_Loop
+                            	F_Data_Move_Loop1:
+00009BF2 C9 96              		r3 = [r1--]
+00009BF3 0B 87 FF FF        		r3 = r3^0xffff
+00009BF5 CA D6              		[r2--] = r3				//bug1
+00009BF6 41 28              		r4-=1
+00009BF7 46 4E              		jnz	F_Data_Move_Loop1
+00009BF8 04 EE              		jmp F_Data_Move_Exit
+                            	F_Data_Move_Loop:
+00009BF9 C9 96              		r3 = [r1--]
+00009BFA CA D6              		[r2--] = r3				//bug1
+00009BFB 41 28              		r4-=1
+00009BFC 44 4E              		jnz	F_Data_Move_Loop
+                            	F_Data_Move_Exit:
+00009BFD A0 92              		pop r2,r5 from [sp]
+00009BFE 90 9A              		retf
+                            	
+                            	//************************************************************************
+                            	// 
+                            	// 设计者: xinqiang
+                            	// 描  述:
+                            	// 日  期: 2005.6.20
+                            	// 版本号: 1.0
+                            	//*************************************************************************
+                            	.public _F_Cover_Initial
+                            	_F_Cover_Initial:
+00009BFF 88 DA              		push r5 to [sp]
+00009C00 08 0B 01 00        		r5 = sp+1
+00009C02 A0 D8              		push r1,r4 to [sp]
+00009C03 04 94              		r2 = [r5+4]				//Get the shift number
+                            	//	r4 = [r5+5]
+00009C04 03 92              		r1 = [r5+3]				//Get the bit number
+00009C05 01 4E              		jnz	?F_Cover_NZ
+00009C06 26 EE              		jmp	?F_Cover_Exit	
+                            	?F_Cover_NZ:
+00009C07 0D 9B 13 00        		r5 = _Cover_Data_buf
+00009C09 43 0A              		r5+=3
+00009C0A 44 96              		r3 = 4
+00009C0B 0C 99 FF FF        		r4 = 0xffff
+00009C0D C5 D8              		[r5] = r4
+00009C0E 40 98              		r4 = 0
+00009C0F 5C 99              		r4 = r4 lsl 4
+                            	?F_Cover_Loop1:
+00009C10 C5 98              		r4 = [r5]
+00009C11 84 99              		r4 = r4 rol 1
+00009C12 CD D8              		[r5--] = r4
+00009C13 94 99              		r4 = r4 rol 3
+00009C14 41 26              		r3-=1
+00009C15 46 4E              		jnz ?F_Cover_Loop1
+00009C16 44 0A              		r5+=4
+00009C17 40 98              		r4 = 0
+00009C18 5C 99              		r4 = r4 lsl 4
+00009C19 44 96              		r3 = 4
+00009C1A 41 22              		r1-=1
+00009C1B 4C 4E              		jnz ?F_Cover_Loop1
+00009C1C 0A C5 FF FF        		test r2,0xffff
+00009C1E 01 4E              		jnz	?F_Cover_Loop2
+00009C1F 0D EE              		jmp	?F_Cover_Exit
+                            	?F_Cover_Loop2:
+00009C20 0C 99 FF FF        		r4 = 0xffff;
+00009C22 5C 99              		r4 = r4 lsl 4
+00009C23 44 96              		r3 = 4
+                            	?F_Cover_Loop3:
+00009C24 C5 98              		r4 = [r5]
+00009C25 84 99              		r4 = r4 rol 1
+00009C26 CD D8              		[r5--] = r4
+00009C27 54 99              		r4 = r4 lsl 3
+00009C28 41 26              		r3-=1
+00009C29 46 4E              		jnz ?F_Cover_Loop3
+00009C2A 44 0A              		r5+=4
+00009C2B 41 24              		r2-=1
+00009C2C 4D 4E              		jnz ?F_Cover_Loop2
+                            	?F_Cover_Exit:
+00009C2D A0 90              		pop r1,r4 from [sp]
+00009C2E 88 98              		pop r5 from [sp]
+00009C2F 90 9A              		retf
+                            	
+                            	//****************************************************************************************************
+                            	// 128X64I液晶底层驱动画圆误差计算  W_Red_Err(int *a,int *b,int *r)
+                            	// 设计者: powerint
+                            	// 描  述: 系统初始化
+                            	// 日  期: 2004.5.9
+                            	// 版本号: 1.2
+                            	//****************************************************************************************************
+                            	.PUBLIC _W_Red_Err
+00009C30 88 DA              	_W_Red_Err: push bp,bp to [sp]
+00009C31 08 0B 01 00        	            bp = sp+1
+00009C33 03 96              	            r3 = [bp+3]
+00009C34 C3 96              	            r3 = [r3]
+00009C35 41 06              	            r3 = r3+1
+00009C36 03 99              	            r4 = r3
+00009C37 0C F6              	            mr = r3*r4,us
+00009C38 03 93              	            r1 = r3
+00009C39 04 96              	            r3 = [bp+4]
+00009C3A C3 96              	            r3 = [r3]
+00009C3B 03 99              	            r4 = r3
+00009C3C 0C F6              	            mr = r3*r4,us
+00009C3D 03 03              	            r1+= r3
+00009C3E 05 96              	            r3 = [bp+5]
+00009C3F C3 96              	            r3 = [r3]
+00009C40 03 99              	            r4 = r3
+00009C41 0C F6              	            mr = r3*r4,us
+00009C42 03 23              	            r1-=r3
+00009C43 06 3E              	            jl squ1
+00009C44 04 98              	            r4 = [bp+4]
+00009C45 C4 96              	            r3 = [r4]
+00009C46 03 23              	            r1-= r3
+00009C47 02 3E              	            jl squ1
+00009C48 41 26              	            r3-=1
+00009C49 C4 D6              	            [r4] = r3;
+00009C4A 03 98              	      squ1: r4 = [bp+3]
+00009C4B C4 96              	            r3 = [r4]
+00009C4C 41 06              	            r3+=1
+00009C4D C4 D6              	            [r4] = r3
+00009C4E 88 98              	            pop bp,bp from [sp]
+00009C4F 90 9A              	            retf       
+0 error(s), 0 warning(s).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

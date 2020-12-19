@@ -1,0 +1,37 @@
+Version: 3.0
+Options: m37
+Obj: "D:\cproject\startupcode\startupD.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\Resource.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\Chinese_Table.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\SPLC501User.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\DataOSforLCD.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\SPLC501Driver_IO.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\hardware.obj"
+Obj: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\main.obj"
+Lib: "D:\cproject\library\CMacro\CMacro1016.lib"
+Output: "C:\Users\»ÆÒ«ìÇ\Desktop\ex5_test2\Debug\ex5_LCD501_Ellipse.S37"
+;Locate: unSP_StartUp in "startupD.obj" at 8009 
+;Align: unSP_StartUp in "startupD.obj" with 0 
+;Locate: IRAM in "SPLC501User.obj" at 9C94  linkat 5 
+;Align: IRAM in "SPLC501User.obj" with 0 
+;Locate: IRAM in "hardware.obj" at 9CA6  linkat 17 
+;Align: IRAM in "hardware.obj" with 0 
+;Locate: IRAM in "main.obj" at 9D39  linkat AA 
+;Align: IRAM in "main.obj" with 0 
+;Locate: RAM in "DataOSforLCD.obj" at 1 
+;Align: RAM in "DataOSforLCD.obj" with 0 
+;Locate: CODE in "SPLC501User.obj" at 80AB 
+;Align: CODE in "SPLC501User.obj" with 0 
+;Locate: CODE in "DataOSforLCD.obj" at 9B8A 
+;Align: CODE in "DataOSforLCD.obj" with 0 
+;Locate: CODE in "SPLC501Driver_IO.obj" at 925F 
+;Align: CODE in "SPLC501Driver_IO.obj" with 0 
+;Locate: CODE in "hardware.obj" at 99AC 
+;Align: CODE in "hardware.obj" with 0 
+;Locate: CODE in "main.obj" at 974C 
+;Align: CODE in "main.obj" with 0 
+;Locate: CODE in "./lshiu1" of "CMacro1016.lib"  at 9C50 
+;Align: CODE in "./lshiu1" of "CMacro1016.lib"  with 0 
+;Locate: CODE in "./rshu1" of "CMacro1016.lib"  at 9C72 
+;Align: CODE in "./rshu1" of "CMacro1016.lib"  with 0 
+;Locate: __sn_init_table at 8000 
